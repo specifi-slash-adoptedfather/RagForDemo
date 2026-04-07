@@ -20,15 +20,10 @@ function parseKeywords(value: string) {
 
 export function getDb() {
   const Database = require("better-sqlite3");
+  const sqliteVec = require("sqlite-vec");
   const dbPath = getDbPath();
   const db = new Database(dbPath, { readonly: true });
-  const vecDllPath = path.resolve(
-    process.cwd(),
-    "node_modules",
-    "sqlite-vec-windows-x64",
-    "vec0.dll",
-  );
-  db.loadExtension(vecDllPath);
+  sqliteVec.load(db);
   return db;
 }
 
