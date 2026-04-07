@@ -133,7 +133,7 @@ export function ChatShell() {
                     <button
                       type="button"
                       className="trace-action-button"
-                      onClick={() => void handleSaveScene(message.traceId!)}
+                      onClick={() => void handleSaveScene(message.traceId)}
                       disabled={savedSceneTraceIds.includes(message.traceId)}
                     >
                       {savedSceneTraceIds.includes(message.traceId) ? "Saved Scene" : "Save Scene"}

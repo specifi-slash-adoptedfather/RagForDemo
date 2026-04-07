@@ -46,7 +46,7 @@ async function answerWithProductPipeline(question: string, recorder: RagTraceRec
 
   const rerankResult = plan.useRerank
     ? await rerankChunks(question, rankedChunks)
-    : { provider: "disabled", rows: rankedChunks };
+    : { provider: "disabled", rows: rankedChunks, settingsEnabled: false };
   recorder.recordRerank(rerankResult);
 
   const selected = pickTop3(rerankResult.rows);
@@ -125,7 +125,7 @@ async function answerWithRetrievalPlan(question: string, recorder: RagTraceRecor
 
   const rerankResult = plan.useRerank
     ? await rerankChunks(question, fusedRows)
-    : { provider: "disabled", rows: fusedRows };
+    : { provider: "disabled", rows: fusedRows, settingsEnabled: false };
   recorder.recordRerank(rerankResult);
 
   const selected = pickTop3(rerankResult.rows);

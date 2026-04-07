@@ -17,53 +17,41 @@ function localRerankScore(question: string, row: RetrievedChunk) {
   return clamp01(Number(score.toFixed(6)));
 }
 
-function mapExternalRerankScores(
+function mapExternalRerankScores<T extends RetrievedChunk>(
   question: string,
-  chunks: RetrievedChunk[],
+  chunks: T[],
   payload: any,
-) {
-  if (Array.isArray(payload?.results)) {
-    const byIndex = new Map<number, number>();
-    for (const item of payload.results) {
-      const score =
-        typeof item.score === "number"
-          ? item.score
-          : typeof item.relevance_score === "number"
-            ? item.relevance_score
-            : null;
-      if (typeof item.index === "number" && typeof score === "number") {
-        byIndex.set(item.index, clamp01(score));
-      }
-    }
-    return chunks.map((chunk, index) => ({
-      ...chunk,
-      rerankScore: byIndex.get(index) ?? localRerankScore(question, chunk),
-    }));
+): T[] {
+  const resultRows = Array.isArray(payload?.results)
+    ? payload.results
+    : Array.isArray(payload?.data)
+      ? payload.data
+      : null;
+
+  if (!resultRows) {
+    throw new Error("Unsupported reranker response payload");
   }
 
-  if (Array.isArray(payload?.data)) {
-    const byIndex = new Map<number, number>();
-    for (const item of payload.data) {
-      const score =
-        typeof item.score === "number"
-          ? item.score
-          : typeof item.relevance_score === "number"
-            ? item.relevance_score
-            : null;
-      if (typeof item.index === "number" && typeof score === "number") {
-        byIndex.set(item.index, clamp01(score));
-      }
+  const byIndex = new Map<number, number>();
+  for (const item of resultRows) {
+    const score =
+      typeof item.score === "number"
+        ? item.score
+        : typeof item.relevance_score === "number"
+          ? item.relevance_score
+          : null;
+    if (typeof item.index === "number" && typeof score === "number") {
+      byIndex.set(item.index, clamp01(score));
     }
-    return chunks.map((chunk, index) => ({
-      ...chunk,
-      rerankScore: byIndex.get(index) ?? localRerankScore(question, chunk),
-    }));
   }
 
-  throw new Error("Unsupported reranker response payload");
+  return chunks.map((chunk, index) => ({
+    ...chunk,
+    rerankScore: byIndex.get(index) ?? localRerankScore(question, chunk),
+  }));
 }
 
-async function externalRerank(question: string, chunks: RetrievedChunk[]) {
+async function externalRerank<T extends RetrievedChunk>(question: string, chunks: T[]) {
   const settings = getRerankerSettings();
   const baseUrl = settings.enabled
     ? settings.baseUrl
@@ -97,7 +85,7 @@ async function externalRerank(question: string, chunks: RetrievedChunk[]) {
   return mapExternalRerankScores(question, chunks, payload);
 }
 
-export async function rerankChunks(question: string, chunks: RetrievedChunk[]) {
+export async function rerankChunks<T extends RetrievedChunk>(question: string, chunks: T[]) {
   const settings = getRerankerSettings();
   const external = await externalRerank(question, chunks).catch(() => null);
 

@@ -6,7 +6,7 @@ import {
   getInvoiceReissueAnswer,
   getLogisticsNotUpdatedAnswer,
 } from "./business-db";
-import { AnswerPayload, RetrievedChunk } from "./types";
+import { AnswerPayload, RankedProductChunk, RetrievedChunk } from "./types";
 import { buildSources, formatCustomerAnswer } from "./generation";
 
 const CATEGORY_PRODUCT = "商品";
@@ -187,13 +187,13 @@ export function findProductCandidates(question: string) {
     .map((item) => item.row);
 }
 
-export function rankProductChunks(question: string, chunks: RetrievedChunk[]) {
+export function rankProductChunks(question: string, chunks: RetrievedChunk[]): RankedProductChunk[] {
   return chunks
     .map((row) => ({
       ...row,
       fusedScore: scoreProductChunk(question, row),
     }))
-    .sort((left, right) => (right.fusedScore || 0) - (left.fusedScore || 0));
+    .sort((left, right) => right.fusedScore - left.fusedScore);
 }
 
 function buildProductSalesListAnswer(): AnswerPayload {
@@ -204,12 +204,10 @@ function buildProductSalesListAnswer(): AnswerPayload {
     )
     .filter(Boolean) as RetrievedChunk[];
 
-  const answer = formatCustomerAnswer(
-    `我们目前在售的产品主要有：云岚轻羽冲锋衣、星屿恒温保温杯 520ml、月白柔护四件套。`,
-  );
-
   return {
-    answer,
+    answer: formatCustomerAnswer(
+      "我们目前在售的产品主要有：云岚轻羽冲锋衣、星屿恒温保温杯 520ml、月白柔护四件套。",
+    ),
     sources: buildSources(salesRows),
   };
 }

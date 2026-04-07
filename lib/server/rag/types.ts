@@ -12,6 +12,10 @@ export type RetrievedChunk = {
   rerankScore?: number;
 };
 
+export type RankedProductChunk = RetrievedChunk & {
+  fusedScore: number;
+};
+
 export type SourceCard = {
   id: string;
   title: string;
