@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { saveSceneIntent } from "../../../../../lib/server/rag/business-db";
-import { getTraceRun } from "../../../../../lib/server/rag/trace";
-import { SourceCard } from "../../../../../lib/server/rag/types";
+import { saveSceneIntent } from "../../../../lib/server/rag/business-db";
+import { getTraceRun } from "../../../../lib/server/rag/trace";
+import { SourceCard } from "../../../../lib/server/rag/types";
 
 export const runtime = "nodejs";
 
