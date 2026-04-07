@@ -1,0 +1,52 @@
+[
+  {
+    "id": "src-vtex-return-policy",
+    "title": "VTEX Return App V3",
+    "type": "github_doc",
+    "language": "en",
+    "local_path": "data-seeds/ecommerce-kb/vtex-return-policy.md",
+    "url": "https://github.com/vtex-apps/return-app",
+    "topics": ["退货", "退款", "售后状态", "运费", "取件"],
+    "note": "中文语料中的相关条目为整理摘要，不是逐字翻译。"
+  },
+  {
+    "id": "src-saleor-order-status",
+    "title": "Saleor Docs - Order Status",
+    "type": "github_doc",
+    "language": "en",
+    "local_path": "data-seeds/ecommerce-kb/saleor-order-status.mdx",
+    "url": "https://github.com/saleor/saleor-docs",
+    "topics": ["订单状态", "订单生命周期", "履约"],
+    "note": "中文语料中的相关条目为主题整理。"
+  },
+  {
+    "id": "src-saleor-refunds",
+    "title": "Saleor Docs - Refunds",
+    "type": "github_doc",
+    "language": "en",
+    "local_path": "data-seeds/ecommerce-kb/saleor-refunds.mdx",
+    "url": "https://github.com/saleor/saleor-docs",
+    "topics": ["退款", "手动退款", "部分退款", "支付"],
+    "note": "中文语料中的相关条目为规则摘要与术语归纳。"
+  },
+  {
+    "id": "src-saleor-shipping-methods",
+    "title": "Saleor Docs - Shipping methods in orders",
+    "type": "github_doc",
+    "language": "en",
+    "local_path": "data-seeds/ecommerce-kb/saleor-shipping-methods-in-orders.mdx",
+    "url": "https://github.com/saleor/saleor-docs",
+    "topics": ["配送方式", "地址", "订单配送"],
+    "note": "中文语料中的相关条目为主题整理。"
+  },
+  {
+    "id": "src-product-catalog",
+    "title": "Product Catalog Seed",
+    "type": "local_seed",
+    "language": "zh",
+    "local_path": "data-seeds/ecommerce-kb-zh/products.jsonl",
+    "url": "",
+    "topics": ["商品名称", "卖点", "规格", "适用人群", "使用场景"],
+    "note": "用于 MVP 演示的本地商品信息样例。"
+  }
+]

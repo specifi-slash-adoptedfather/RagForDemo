@@ -1,0 +1,9 @@
+node_modules/
+.next/
+*.log
+.env
+
+data/business/*.db-wal
+data/business/*.db-shm
+data/sqlite-vec/*.db-wal
+data/sqlite-vec/*.db-shm

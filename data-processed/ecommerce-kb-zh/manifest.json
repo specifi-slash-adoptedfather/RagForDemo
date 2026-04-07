@@ -1,0 +1,9 @@
+{
+  "dataset": "ecommerce-kb-zh",
+  "chunk_count": 42,
+  "faq_count": 12,
+  "policy_count": 6,
+  "product_count": 24,
+  "source_count": 5,
+  "input_dir": "data-seeds\\ecommerce-kb-zh"
+}

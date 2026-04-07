@@ -1,0 +1,90 @@
+import { Message, Source } from "./types";
+
+const cannedSources: Source[] = [
+  {
+    id: "src-1",
+    title: "\u552e\u540e\u670d\u52a1\u653f\u7b56",
+    section: "\u9000\u8d27\u4e0e\u6362\u8d27",
+    excerpt:
+      "\u7b7e\u6536\u540e 7 \u5929\u5185\u53ef\u7533\u8bf7\u65e0\u7406\u7531\u9000\u8d27\uff0c\u5546\u54c1\u9700\u4fdd\u6301\u5b8c\u6574\uff0c\u4e0d\u5f71\u54cd\u4e8c\u6b21\u9500\u552e\u3002",
+  },
+  {
+    id: "src-2",
+    title: "\u53d1\u7968\u4e0e\u62a5\u9500\u89c4\u5219",
+    section: "\u7535\u5b50\u53d1\u7968",
+    excerpt:
+      "\u7528\u6237\u786e\u8ba4\u6536\u8d27\u540e\u53ef\u5728\u8ba2\u5355\u8be6\u60c5\u9875\u7533\u8bf7\u5f00\u5177\u7535\u5b50\u53d1\u7968\uff0c\u9ed8\u8ba4 1 \u4e2a\u5de5\u4f5c\u65e5\u5185\u5f00\u51fa\u3002",
+  },
+  {
+    id: "src-3",
+    title: "\u7269\u6d41\u5f02\u5e38\u5904\u7406\u624b\u518c",
+    section: "\u8fd0\u8f93\u8ddf\u8e2a",
+    excerpt:
+      "\u5982\u679c\u7269\u6d41\u4fe1\u606f 48 \u5c0f\u65f6\u672a\u66f4\u65b0\uff0c\u5ba2\u670d\u9700\u5148\u6838\u5bf9\u626b\u63cf\u8282\u70b9\uff0c\u518d\u53d1\u8d77\u627f\u8fd0\u5546\u50ac\u4ef6\u3002",
+  },
+];
+
+function buildAnswer(input: string) {
+  const normalized = input.trim();
+
+  if (!normalized) {
+    return {
+      content:
+        "\u8bf7\u8f93\u5165\u8ba2\u5355\u3001\u9000\u8d27\u3001\u53d1\u7968\u6216\u7269\u6d41\u76f8\u5173\u95ee\u9898\uff0c\u6211\u4f1a\u57fa\u4e8e\u5ba2\u670d\u77e5\u8bc6\u5e93\u7ec4\u7ec7\u56de\u7b54\u3002",
+      sources: cannedSources.slice(0, 1),
+    };
+  }
+
+  if (
+    normalized.includes("\u9000\u8d27") ||
+    normalized.includes("\u6362\u8d27") ||
+    normalized.includes("7\u5929")
+  ) {
+    return {
+      content:
+        "\u5982\u679c\u5546\u54c1\u5728\u7b7e\u6536\u540e 7 \u5929\u5185\uff0c\u4e14\u5305\u88c5\u5b8c\u6574\u3001\u4e0d\u5f71\u54cd\u4e8c\u6b21\u9500\u552e\uff0c\u53ef\u4ee5\u7533\u8bf7\u65e0\u7406\u7531\u9000\u8d27\u3002\u82e5\u5df2\u7ecf\u4f7f\u7528\u6216\u5546\u54c1\u5b58\u5728\u5b9a\u5236\u5c5e\u6027\uff0c\u9700\u8981\u7ed3\u5408\u552e\u540e\u653f\u7b56\u8fdb\u4e00\u6b65\u5224\u65ad\u3002",
+      sources: [cannedSources[0]],
+    };
+  }
+
+  if (
+    normalized.includes("\u53d1\u7968") ||
+    normalized.includes("\u62a5\u9500")
+  ) {
+    return {
+      content:
+        "\u53ef\u4ee5\u8865\u5f00\u7535\u5b50\u53d1\u7968\u3002\u7528\u6237\u5728\u786e\u8ba4\u6536\u8d27\u540e\uff0c\u53ef\u4ee5\u4ece\u8ba2\u5355\u8be6\u60c5\u9875\u53d1\u8d77\u5f00\u7968\u7533\u8bf7\uff0c\u9ed8\u8ba4 1 \u4e2a\u5de5\u4f5c\u65e5\u5185\u51fa\u7968\u3002",
+      sources: [cannedSources[1]],
+    };
+  }
+
+  if (
+    normalized.includes("\u7269\u6d41") ||
+    normalized.includes("\u5feb\u9012") ||
+    normalized.includes("\u6ca1\u66f4\u65b0")
+  ) {
+    return {
+      content:
+        "\u7269\u6d41\u4fe1\u606f\u957f\u65f6\u95f4\u672a\u66f4\u65b0\u65f6\uff0c\u4f18\u5148\u6838\u5bf9\u6700\u540e\u4e00\u4e2a\u626b\u63cf\u8282\u70b9\u548c\u6267\u884c\u65f6\u95f4\u3002\u82e5\u5df2\u8d85\u8fc7 48 \u5c0f\u65f6\uff0c\u53ef\u4ee5\u89e6\u53d1\u627f\u8fd0\u5546\u50ac\u4ef6\u6216\u5347\u7ea7\u5f02\u5e38\u4ef6\u5904\u7406\u3002",
+      sources: [cannedSources[2]],
+    };
+  }
+
+  return {
+    content:
+      "\u8fd9\u662f\u7535\u5546\u5ba2\u670d\u573a\u666f\u7684\u672c\u5730 mock \u54cd\u5e94\u3002\u63a5\u5165\u771f\u5b9e\u540e\u7aef\u540e\uff0c\u8fd9\u91cc\u4f1a\u6839\u636e\u8ba2\u5355\u3001\u552e\u540e\u653f\u7b56\u3001\u53d1\u7968\u89c4\u5219\u548c\u7269\u6d41\u77e5\u8bc6\u5e93\u8fd4\u56de\u7b54\u6848\u4e0e\u5f15\u7528\u3002",
+    sources: cannedSources.slice(0, 2),
+  };
+}
+
+export async function sendMockMessage(input: string): Promise<Message> {
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  const answer = buildAnswer(input);
+
+  return {
+    id: `assistant-${Date.now()}`,
+    role: "assistant",
+    content: answer.content,
+    sources: answer.sources,
+  };
+}

@@ -1,0 +1,18 @@
+{
+  "db_path": "D:\\workspace\\RAG mvp\\data\\sqlite-vec\\ecommerce-kb.db",
+  "chunk_count": 42,
+  "embedding_dimensions": 1536,
+  "sqlite_vec_version": "v0.1.7",
+  "vector_rows": 42,
+  "ready_for_embeddings": true,
+  "embedded_count": 42,
+  "error_count": 0,
+  "embedding_model": "text-embedding-3-small",
+  "pending_count": 0,
+  "last_sync": {
+    "inserted_count": 0,
+    "updated_count": 0,
+    "removed_count": 0,
+    "unchanged_count": 42
+  }
+}
