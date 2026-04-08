@@ -21,10 +21,24 @@ function buildTraceHref(traceId: string) {
   return `/debug/rag-traces?traceId=${encodeURIComponent(traceId)}`;
 }
 
+function looksComplex(input: string) {
+  const text = input.trim();
+  if (!text) return false;
+
+  return (
+    text.length >= 18 ||
+    /[，,；;：:]/.test(text) ||
+    ["为什么", "如果", "适合", "合适", "徒步", "露营", "登山", "旅行", "对比", "区别"].some((hint) =>
+      text.includes(hint),
+    )
+  );
+}
+
 export function ChatShell() {
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingHint, setLoadingHint] = useState("");
   const [savedSceneTraceIds, setSavedSceneTraceIds] = useState<string[]>([]);
 
   async function submitMessage(value: string) {
@@ -41,6 +55,11 @@ export function ChatShell() {
 
     setMessages((current) => [...current, userMessage]);
     setInput("");
+    setLoadingHint(
+      looksComplex(trimmed)
+        ? "您问的问题比较复杂，需要查查资料，请耐心等待。"
+        : "正在检索相关资料，请稍候。",
+    );
     setIsLoading(true);
 
     try {
@@ -57,6 +76,7 @@ export function ChatShell() {
       ]);
     } finally {
       setIsLoading(false);
+      setLoadingHint("");
     }
   }
 
@@ -133,10 +153,10 @@ export function ChatShell() {
                     <button
                       type="button"
                       className="trace-action-button"
-                      onClick={() => void handleSaveScene(message.traceId!)}
-                      disabled={savedSceneTraceIds.includes(message.traceId!)}
+                      onClick={() => void handleSaveScene(message.traceId)}
+                      disabled={savedSceneTraceIds.includes(message.traceId)}
                     >
-                      {savedSceneTraceIds.includes(message.traceId!) ? "Saved Scene" : "Save Scene"}
+                      {savedSceneTraceIds.includes(message.traceId) ? "Saved Scene" : "Save Scene"}
                     </button>
                     <a
                       className="trace-inline-link"
@@ -170,6 +190,7 @@ export function ChatShell() {
               <div className="message-header">
                 <div className="message-meta">RAG 助手</div>
               </div>
+              <div className="message-content">{loadingHint}</div>
               <div className="typing-indicator">
                 <span />
                 <span />
