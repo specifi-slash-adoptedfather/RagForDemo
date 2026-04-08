@@ -16,6 +16,7 @@ type TraceRun = {
   llmRequest: string;
   llmResponse: string;
   finalResponse: string;
+  timingInfo: string;
   error: string;
   createdAt: string;
   updatedAt: string;
@@ -105,6 +106,7 @@ export function RagTraceDebugger() {
   const [complexityFilter, setComplexityFilter] = useState("all");
   const [routeFilter, setRouteFilter] = useState("all");
   const [keyword, setKeyword] = useState("");
+  const [selectedSectionLabel, setSelectedSectionLabel] = useState("");
   const [isPending, startTransition] = useTransition();
 
   async function loadTraceDetail(traceId: string) {
@@ -201,6 +203,7 @@ export function RagTraceDebugger() {
 
   const sections = detail
     ? [
+        { label: "Timing", value: detail.run.timingInfo },
         { label: "Retrieval Plan", value: detail.run.retrievalPlan },
         { label: "Vector Search", value: detail.run.vectorSearch },
         { label: "Keyword Search", value: detail.run.keywordSearch },
@@ -213,7 +216,20 @@ export function RagTraceDebugger() {
       ].filter((section) => hasTraceField(section.value))
     : [];
 
+  useEffect(() => {
+    if (!sections.length) {
+      setSelectedSectionLabel("");
+      return;
+    }
+
+    if (!selectedSectionLabel || !sections.some((section) => section.label === selectedSectionLabel)) {
+      setSelectedSectionLabel(sections[0].label);
+    }
+  }, [detail?.run.traceId, sections.length]);
+
   const isDomainRule = detail?.run.routeType === "domain_rule";
+  const selectedSection =
+    sections.find((section) => section.label === selectedSectionLabel) || sections[0];
 
   return (
     <main className="trace-page">
@@ -360,15 +376,58 @@ export function RagTraceDebugger() {
                 </section>
               ) : null}
 
+              {sections.length > 0 ? (
+                <section className="trace-detail-card">
+                  <div className="trace-panel-header">
+                    <h3>Section Switch</h3>
+                  </div>
+                  <div className="trace-tab-row">
+                    {sections.map((section) => (
+                      <button
+                        key={section.label}
+                        type="button"
+                        className={`trace-tab-button ${
+                          selectedSection?.label === section.label ? "trace-tab-button-active" : ""
+                        }`}
+                        onClick={() => setSelectedSectionLabel(section.label)}
+                      >
+                        {section.label}
+                        {section.label === "Timing"
+                          ? ""
+                          : (() => {
+                              try {
+                                const parsed = JSON.parse(detail.run.timingInfo || "{}") as Record<string, number>;
+                                const keyMap: Record<string, string> = {
+                                  "Retrieval Plan": "total_ms",
+                                  "Vector Search": "vector_search_ms",
+                                  "Keyword Search": "keyword_search_ms",
+                                  "Score Fusion": "fusion_ms",
+                                  "Rerank": "rerank_ms",
+                                  "LLM Prompt": "llm_ms",
+                                  "LLM Response": "llm_ms",
+                                  "Final Response": "total_ms",
+                                };
+                                const timingValue = parsed[keyMap[section.label]];
+                                return typeof timingValue === "number" ? ` · ${timingValue}ms` : "";
+                              } catch {
+                                return "";
+                              }
+                            })()}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
               <section className="trace-detail-stack">
-                {sections.map((section) => (
-                  <article key={section.label} className="trace-detail-card">
+                {selectedSection ? (
+                  <article key={selectedSection.label} className="trace-detail-card">
                     <div className="trace-panel-header">
-                      <h3>{section.label}</h3>
+                      <h3>{selectedSection.label}</h3>
                     </div>
-                    <pre className="trace-code-block">{safePrettyJson(section.value)}</pre>
+                    <pre className="trace-code-block">{safePrettyJson(selectedSection.value)}</pre>
                   </article>
-                ))}
+                ) : null}
               </section>
 
               <section className="trace-detail-card">

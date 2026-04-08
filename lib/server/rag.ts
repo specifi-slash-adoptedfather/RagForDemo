@@ -27,26 +27,37 @@ function pickTop3<T>(rows: T[]) {
   return rows.slice(0, 3);
 }
 
+function nowMs() {
+  return Date.now();
+}
+
 async function answerWithProductPipeline(question: string, recorder: RagTraceRecorder) {
+  const totalStart = nowMs();
   const plan = buildRetrievalPlan(question);
   recorder.recordRoute("product_pipeline", plan);
 
+  const productMatchStart = nowMs();
   const candidates = findProductCandidates(question);
+  const productMatchMs = nowMs() - productMatchStart;
   if (candidates.length === 0) {
     return answerWithRetrievalPlan(question, recorder);
   }
 
+  const productRankStart = nowMs();
   const familyChunks = getProductChunks(getProductFamily(candidates[0].chunkId));
   const rankedChunks = rankProductChunks(question, familyChunks).slice(0, 8);
+  const productRankMs = nowMs() - productRankStart;
 
   recorder.recordFusion({
     source: "product_chunk_ranker",
     rows: rankedChunks,
   });
 
+  const rerankStart = nowMs();
   const rerankResult = plan.useRerank
     ? await rerankChunks(question, rankedChunks)
     : { provider: "disabled", rows: rankedChunks, settingsEnabled: false };
+  const rerankMs = nowMs() - rerankStart;
   recorder.recordRerank(rerankResult);
 
   const selected = pickTop3(rerankResult.rows);
@@ -64,10 +75,20 @@ async function answerWithProductPipeline(question: string, recorder: RagTraceRec
     request: useDecisionPrompt ? "product_decision_prompt" : llmRequest,
   });
 
+  const llmStart = nowMs();
   const answer = useDecisionPrompt
     ? await generateProductDecisionAnswer(question, selected)
     : await generateAnswerFromRequest(llmRequest);
+  const llmMs = nowMs() - llmStart;
   recorder.recordLlmResponse({ answer });
+
+  recorder.recordTiming({
+    product_match_ms: productMatchMs,
+    product_rank_ms: productRankMs,
+    rerank_ms: rerankMs,
+    llm_ms: llmMs,
+    total_ms: nowMs() - totalStart,
+  });
 
   return {
     answer,
@@ -76,11 +97,14 @@ async function answerWithProductPipeline(question: string, recorder: RagTraceRec
 }
 
 async function answerWithRetrievalPlan(question: string, recorder: RagTraceRecorder) {
+  const totalStart = nowMs();
   const plan = buildRetrievalPlan(question);
   recorder.recordRoute("retrieval_pipeline", plan);
 
   if (plan.complexity === "simple") {
+    const vectorStart = nowMs();
     const vectorRows = await retrieveByVector(question, plan.recallSize);
+    const vectorMs = nowMs() - vectorStart;
     recorder.recordVectorSearch({
       topK: plan.recallSize,
       mode: "vector_only",
@@ -94,8 +118,15 @@ async function answerWithRetrievalPlan(question: string, recorder: RagTraceRecor
       request: llmRequest,
     });
 
+    const llmStart = nowMs();
     const answer = await generateAnswer(question, selected);
+    const llmMs = nowMs() - llmStart;
     recorder.recordLlmResponse({ answer });
+    recorder.recordTiming({
+      vector_search_ms: vectorMs,
+      llm_ms: llmMs,
+      total_ms: nowMs() - totalStart,
+    });
 
     return {
       answer,
@@ -103,10 +134,12 @@ async function answerWithRetrievalPlan(question: string, recorder: RagTraceRecor
     };
   }
 
+  const vectorStart = nowMs();
   const [vectorRows, keywordRows] = await Promise.all([
     retrieveByVector(question, plan.recallSize),
     Promise.resolve(retrieveByKeyword(question, plan.recallSize)),
   ]);
+  const vectorKeywordMs = nowMs() - vectorStart;
 
   recorder.recordVectorSearch({
     topK: plan.recallSize,
@@ -118,14 +151,18 @@ async function answerWithRetrievalPlan(question: string, recorder: RagTraceRecor
     rows: keywordRows,
   });
 
+  const fusionStart = nowMs();
   const fusedRows = plan.useFusion
     ? fuseRetrievalResults(vectorRows, keywordRows, plan.recallSize)
     : vectorRows;
+  const fusionMs = nowMs() - fusionStart;
   recorder.recordFusion({ rows: fusedRows });
 
+  const rerankStart = nowMs();
   const rerankResult = plan.useRerank
     ? await rerankChunks(question, fusedRows)
     : { provider: "disabled", rows: fusedRows, settingsEnabled: false };
+  const rerankMs = nowMs() - rerankStart;
   recorder.recordRerank(rerankResult);
 
   const selected = pickTop3(rerankResult.rows);
@@ -135,8 +172,17 @@ async function answerWithRetrievalPlan(question: string, recorder: RagTraceRecor
     request: llmRequest,
   });
 
+  const llmStart = nowMs();
   const answer = await generateAnswer(question, selected);
+  const llmMs = nowMs() - llmStart;
   recorder.recordLlmResponse({ answer });
+  recorder.recordTiming({
+    vector_keyword_search_ms: vectorKeywordMs,
+    fusion_ms: fusionMs,
+    rerank_ms: rerankMs,
+    llm_ms: llmMs,
+    total_ms: nowMs() - totalStart,
+  });
 
   return {
     answer,
@@ -145,6 +191,7 @@ async function answerWithRetrievalPlan(question: string, recorder: RagTraceRecor
 }
 
 export async function answerQuestion(question: string) {
+  const totalStart = nowMs();
   const recorder = new RagTraceRecorder(question);
 
   try {
@@ -156,6 +203,9 @@ export async function answerQuestion(question: string) {
         ...domainAnswer,
         traceId: recorder.traceId,
       };
+      recorder.recordTiming({
+        total_ms: nowMs() - totalStart,
+      });
       recorder.complete(payload);
       return payload;
     }

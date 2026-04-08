@@ -31,6 +31,7 @@ function ensureTraceTables() {
       llm_request text not null default '',
       llm_response text not null default '',
       final_response text not null default '',
+      timing_info text not null default '',
       error text not null default '',
       created_at text not null default current_timestamp,
       updated_at text not null default current_timestamp
@@ -51,6 +52,11 @@ function ensureTraceTables() {
     create index if not exists idx_rag_trace_events_trace_id
       on rag_trace_events(trace_id, id asc);
   `);
+  const columns = db.prepare("pragma table_info(rag_trace_runs)").all();
+  const columnNames = new Set(columns.map((row: any) => row.name));
+  if (!columnNames.has("timing_info")) {
+    db.exec("alter table rag_trace_runs add column timing_info text not null default '';");
+  }
   db.close();
 }
 
@@ -66,6 +72,7 @@ type SnapshotPatch = {
   llmRequest?: unknown;
   llmResponse?: unknown;
   finalResponse?: unknown;
+  timingInfo?: unknown;
   error?: string;
 };
 
@@ -115,6 +122,7 @@ export class RagTraceRecorder {
           llm_request = case when ? is null then llm_request else ? end,
           llm_response = case when ? is null then llm_response else ? end,
           final_response = case when ? is null then final_response else ? end,
+          timing_info = case when ? is null then timing_info else ? end,
           error = coalesce(?, error),
           updated_at = ?
       where trace_id = ?
@@ -139,6 +147,8 @@ export class RagTraceRecorder {
       patch.llmResponse === undefined ? null : stringify(patch.llmResponse),
       patch.finalResponse === undefined ? null : stringify(patch.finalResponse),
       patch.finalResponse === undefined ? null : stringify(patch.finalResponse),
+      patch.timingInfo === undefined ? null : stringify(patch.timingInfo),
+      patch.timingInfo === undefined ? null : stringify(patch.timingInfo),
       patch.error ?? null,
       nowIso(),
       this.traceId,
@@ -204,6 +214,11 @@ export class RagTraceRecorder {
     this.appendEvent("llm_response", payload);
   }
 
+  recordTiming(payload: unknown) {
+    this.updateSnapshot({ timingInfo: payload });
+    this.appendEvent("timing", payload);
+  }
+
   complete(payload: unknown) {
     this.updateSnapshot({
       status: "completed",
@@ -241,6 +256,7 @@ export function getTraceRun(traceId: string) {
       llm_request as llmRequest,
       llm_response as llmResponse,
       final_response as finalResponse,
+      timing_info as timingInfo,
       error as error,
       created_at as createdAt,
       updated_at as updatedAt
@@ -271,6 +287,7 @@ export function listTraceRuns(limit: number) {
       llm_request as llmRequest,
       llm_response as llmResponse,
       final_response as finalResponse,
+      timing_info as timingInfo,
       error as error,
       created_at as createdAt,
       updated_at as updatedAt

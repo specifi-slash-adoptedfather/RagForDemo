@@ -52,6 +52,7 @@ export type TraceRun = {
   llmRequest: string;
   llmResponse: string;
   finalResponse: string;
+  timingInfo: string;
   error: string;
   createdAt: string;
   updatedAt: string;

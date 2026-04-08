@@ -516,6 +516,29 @@ textarea {
   gap: 12px;
 }
 
+.trace-tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.trace-tab-button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--text);
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.trace-tab-button-active {
+  border-color: rgba(179, 92, 46, 0.42);
+  background: rgba(255, 244, 234, 0.96);
+  color: var(--accent-deep);
+}
+
 .trace-filters {
   display: flex;
   flex-direction: column;
