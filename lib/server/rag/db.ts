@@ -18,12 +18,29 @@ function parseKeywords(value: string) {
   }
 }
 
+function getVecExtensionPath() {
+  const root = path.resolve(process.cwd(), "node_modules");
+
+  if (process.platform === "win32") {
+    return path.join(root, "sqlite-vec-windows-x64", "vec0.dll");
+  }
+
+  if (process.platform === "linux") {
+    return path.join(root, "sqlite-vec-linux-x64", "vec0.so");
+  }
+
+  if (process.platform === "darwin") {
+    return path.join(root, "sqlite-vec-darwin-x64", "vec0.dylib");
+  }
+
+  throw new Error(`Unsupported platform for sqlite-vec extension: ${process.platform}`);
+}
+
 export function getDb() {
   const Database = require("better-sqlite3");
-  const sqliteVec = require("sqlite-vec");
   const dbPath = getDbPath();
   const db = new Database(dbPath, { readonly: true });
-  sqliteVec.load(db);
+  db.loadExtension(getVecExtensionPath());
   return db;
 }
 
