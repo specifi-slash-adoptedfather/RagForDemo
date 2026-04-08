@@ -3,6 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 
+const CURL_BIN = process.platform === "win32" ? "curl.exe" : "curl";
+
 export function postJsonWithCurl(
   baseUrl: string,
   apiKey: string,
@@ -17,7 +19,7 @@ export function postJsonWithCurl(
 
   try {
     const output = execFileSync(
-      "curl.exe",
+      CURL_BIN,
       [
         "-sS",
         "-X",

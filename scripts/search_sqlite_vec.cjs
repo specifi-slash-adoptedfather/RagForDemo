@@ -7,6 +7,8 @@ const Database = require("better-sqlite3");
 const sqliteVec = require("sqlite-vec");
 const dotenv = require("dotenv");
 
+const CURL_BIN = process.platform === "win32" ? "curl.exe" : "curl";
+
 dotenv.config({ path: path.join(__dirname, "..", ".env"), override: true });
 
 const query = process.argv[2];
@@ -43,7 +45,7 @@ async function main() {
   );
 
   const output = execFileSync(
-    "curl.exe",
+    CURL_BIN,
     [
       "-sS",
       "-X",
