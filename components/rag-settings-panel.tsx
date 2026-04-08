@@ -17,9 +17,9 @@ type SettingsResponse = {
 
 const EMPTY_SETTINGS: RerankerSettings = {
   enabled: false,
-  baseUrl: "",
+  baseUrl: "https://api.cohere.com/v2",
   apiKey: "",
-  model: "",
+  model: "rerank-v3.5",
   endpoint: "rerank",
 };
 
@@ -139,7 +139,7 @@ export function RagSettingsPanel() {
               <input
                 className="trace-filter-input"
                 value={settings.baseUrl}
-                placeholder="https://your-reranker-host/v1"
+                placeholder="https://api.cohere.com/v2"
                 onChange={(event) =>
                   setSettings((current) => ({
                     ...current,
@@ -169,7 +169,7 @@ export function RagSettingsPanel() {
               <input
                 className="trace-filter-input"
                 value={settings.model}
-                placeholder="bge-reranker-v2"
+                placeholder="rerank-v3.5"
                 onChange={(event) =>
                   setSettings((current) => ({
                     ...current,
@@ -198,6 +198,7 @@ export function RagSettingsPanel() {
           <div className="settings-notes">
             <div>Simple questions: vector + keyword hybrid recall.</div>
             <div>Complex questions: hybrid recall, rerank only the top 8 candidates.</div>
+            <div>Recommended provider: Cohere Rerank (`https://api.cohere.com/v2`, model `rerank-v3.5`).</div>
             <div>
               If the external reranker is unavailable, the backend currently falls back
               to local rerank scoring and marks the provider in trace logs.

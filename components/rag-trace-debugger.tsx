@@ -400,7 +400,7 @@ export function RagTraceDebugger() {
                                 const keyMap: Record<string, string> = {
                                   "Retrieval Plan": "total_ms",
                                   "Vector Search": "vector_search_ms",
-                                  "Keyword Search": "keyword_search_ms",
+                                  "Keyword Search": "vector_keyword_search_ms",
                                   "Score Fusion": "fusion_ms",
                                   "Rerank": "rerank_ms",
                                   "LLM Prompt": "llm_ms",
